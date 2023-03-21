@@ -1,46 +1,62 @@
 package com.intellij.learn.util;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JSONUtils {
-	public static Object getValueFromJson(JSONObject object, String attributeName) {
-		if (object == null || attributeName == null) {
-			return null;
-		}
-		Object returnObj = null;//object.opt(attributeName);
-		if(null==returnObj) {
-//			JSONObject object = new JSONObject(jsonObj);
-			Set<String> keySet = object.keySet();
-			for (String key : keySet) {
-				Object value = object.get(key);
-				if(key.equalsIgnoreCase(attributeName)) {
-					returnObj = value;
-					break;
-				}
-				
-				if(value.getClass().getSimpleName().equalsIgnoreCase("JSONArray")) {
-					JSONArray jsArr = object.getJSONArray(key);
-					for(int i=0;i<jsArr.length();i++) {
-						JSONObject obj1 = jsArr.getJSONObject(i);
-						Set<String> keySet1 = obj1.keySet();
-						for (String key1 : keySet1) {
-							if(key1.equalsIgnoreCase(attributeName)) {
-								returnObj = obj1.get(key1);
-//								System.out.printf("%s=%s (%s)\n", key1, value1, value1.getClass()
-//										.getSimpleName());
-								break;
-							}
-							
+	public static Object jsonToMap(JSONObject json, String attributeName) throws JSONException {
+	    Map<String, Object> retMap = new HashMap<String, Object>();
+	    
+	    if(json != JSONObject.NULL) {
+	        retMap = toMap(json,retMap);
+	    }
+	    return retMap.getOrDefault(attributeName,"NA");
+	}
 
-						}
-					}
-				}
-			}
-		}
-		return returnObj;
+	public static Map<String, Object> toMap(JSONObject object, Map<String, Object> map) throws JSONException {
+
+	    Iterator<String> keysItr = object.keys();
+	    while(keysItr.hasNext()) {
+	        String key = keysItr.next();
+	        Object value = object.get(key);
+	        if(value instanceof JSONArray) {
+	            value = toList((JSONArray) value);
+	        }
+	        
+	        else if(value instanceof JSONObject) {
+	            value = toMap((JSONObject) value, map);
+	        }
+	        if(value instanceof Map) {
+	        }else {
+	        	map.put(key, value);
+	        }
+	        
+	    }
+	    return map;
+	}
+
+	public static List<Object> toList(JSONArray array) throws JSONException {
+	    List<Object> list = new ArrayList<Object>();
+	    for(int i = 0; i < array.length(); i++) {
+	        Object value = array.get(i);
+	        if(value instanceof JSONArray) {
+	            value = toList((JSONArray) value);
+	        }
+
+	        else if(value instanceof JSONObject) {
+	            value = toMap((JSONObject) value, new HashMap<String, Object>());
+	        }
+	        list.add(value);
+	    }
+	    return list;
+	}
+		
 
 	}
-}
