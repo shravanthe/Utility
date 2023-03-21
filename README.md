@@ -6,5 +6,5 @@ Different repository for efficient work.
                     **One can use this file as below.**
                      JSONObject jsonObj = new JSONObject(jsonString);
                     // Get the value of the "genre_handle" attribute
-                     String name = (String) JSONUtils.getValueFromJson(jsonObj, "genre_handle");
+                     String name = (String) JSONUtils.jsonToMap(jsonObj, "genre_handle");
                     System.out.println(name); // Output: John
